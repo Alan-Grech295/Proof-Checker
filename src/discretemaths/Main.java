@@ -3,6 +3,8 @@ package discretemaths;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.net.URI;
+import java.net.URL;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap.KeySetView;
@@ -154,6 +156,35 @@ public class Main {
             }
         });
         file.add(exportItem);
+
+        // Help Menu
+        JMenu help = new JMenu("Help");
+        help.setMnemonic(KeyEvent.VK_H);
+        help.getAccessibleContext().setAccessibleDescription("Help");
+        menuBar.add(help);
+
+        // View Readme
+        JMenuItem readmeItem = new JMenuItem("View README...", KeyEvent.VK_R);
+        readmeItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+                if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+                    try {
+                        desktop.browse(
+                                new URL("https://github.com/Alan-Grech295/Proof-Checker/blob/main/README.md").toURI());
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(null, "Could not view repository README on browser", "Help",
+                                JOptionPane.ERROR_MESSAGE);
+                        ex.printStackTrace();
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Could not view repository README on browser", "Help",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        help.add(readmeItem);
 
         panel.add(menuBar, BorderLayout.NORTH);
 
