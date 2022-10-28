@@ -250,6 +250,22 @@ public class Main {
             }
         }
 
+        if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+            removeItem(lines.get(lineNum - 1));
+            lines.remove(lineNum - 1);
+            for (int i = lineNum - 1; i < lines.size(); i++) {
+                Line l = lines.get(i);
+                l.setLineNum(l.getLineNum() - 1);
+                l.decrementArgs(lineNum - 1);
+            }
+
+            checkLines();
+
+        }
+
+        // 0 1 2 3 4 5
+        // 1 2 3 5 6 7
+
         if (e.getKeyCode() == KeyEvent.VK_UP) {
             moveUp(lineNum);
         }
@@ -282,6 +298,15 @@ public class Main {
         }
 
         linePanel.add(c);
+        frame.pack();
+    }
+
+    private void removeItem(Component c) {
+        // If a line is added when the layout has no rows left, increment the rows
+        lyt.setRows(Math.max(lines.size() - 1, frame.getHeight() / LINE_HEIGHT));
+        linePanel.setPreferredSize(new Dimension(linePanel.getWidth(), (lines.size() - 1) * LINE_HEIGHT));
+
+        linePanel.remove(c);
         frame.pack();
     }
 

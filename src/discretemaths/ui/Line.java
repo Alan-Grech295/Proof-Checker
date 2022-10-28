@@ -35,7 +35,8 @@ public class Line extends JPanel {
         BIIMPE1("<=>E1", BiimpliesE1.class), BIIMPE2("<=>E2", BiimpliesE2.class), BIIMPI("<=>I", BiimpliesI.class),
         COPY("Copy", Copy.class),
         IMPE("=>E", ImpliesE.class), IMPI("=>I", ImpliesI.class),
-        ORE("vE", OrE.class), ORI1("vI1", OrI1.class), ORI2("vI2", OrI2.class);
+        ORE("vE", OrE.class), ORI1("vI1", OrI1.class), ORI2("vI2", OrI2.class),
+        NOTE("¬E", NotE.class), NOTI("¬I", NotI.class);
 
         private String name;
         private Class<? extends Rule> rule;
@@ -75,6 +76,7 @@ public class Line extends JPanel {
     private JTextField line;
     private JComboBox<String> reasonBox;
     private JTextField argsField;
+    private JLabel lineNumLabel;
     private int lineNum;
 
     private boolean hasFocus = false;
@@ -101,7 +103,7 @@ public class Line extends JPanel {
         this.lineFocusListener = lineFocusListener;
         this.depthListener = depthListener;
         this.lineNum = lineNum;
-        JLabel lineNumLabel = new JLabel(Integer.toString(lineNum) + ". ");
+        lineNumLabel = new JLabel(Integer.toString(lineNum) + ". ");
         lineNumLabel
                 .setPreferredSize(new Dimension(lineNumLabel.getFont().getSize() * 2, Main.getInstance().LINE_HEIGHT));
 
@@ -221,6 +223,11 @@ public class Line extends JPanel {
 
     public String getText() {
         return line.getText();
+    }
+
+    public void setLineNum(int num) {
+        lineNum = num;
+        lineNumLabel.setText(Integer.toString(num) + ". ");
     }
 
     public String getArgs() {
@@ -376,6 +383,66 @@ public class Line extends JPanel {
                 argsField.setToolTipText("[Line " + Integer.toString(lineNum) + "]: " + argsErrorMsg);
             }
         }
+    }
+
+    // Replaces [start, end)
+    private String replace(String text, int start, int end, String replace) {
+        String out = text.substring(0, start);
+        out += replace;
+        out += text.substring(end, text.length());
+
+        return out;
+    }
+
+    public void decrementArgs(int line) {
+        String text = argsField.getText().replaceAll("[ \n\t]", "");
+
+        if (text.isEmpty())
+            return;
+
+        int numStartIndex = 0;
+        int numEndIndex = 0;
+
+        boolean foundNum = true;
+
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (Character.isDigit(c) && !foundNum) {
+                numStartIndex = i;
+                numEndIndex = i;
+            }
+
+            foundNum = Character.isDigit(c);
+
+            if (foundNum)
+                numEndIndex = i;
+
+            if (!foundNum && numStartIndex != (numEndIndex - 1)) {
+                numEndIndex = i;
+                String numText = "";
+                int num = Integer.parseInt(text.substring(numStartIndex, numEndIndex));
+                if (num >= line) {
+                    numText = Integer.toString(num - 1);
+                    text = replace(text, numStartIndex, numEndIndex, numText);
+                    i -= (numEndIndex - numStartIndex) - numText.length();
+                }
+
+                numStartIndex = i;
+                numEndIndex = i;
+            }
+        }
+
+        if (foundNum) {
+            numEndIndex = text.length();
+            String numText = "";
+            int num = Integer.parseInt(text.substring(numStartIndex, numEndIndex));
+            if (num >= line) {
+                numText = Integer.toString(num - 1);
+                text = replace(text, numStartIndex, numEndIndex, numText);
+            }
+        }
+
+        argsField.setText(text);
     }
 
     public void setLineError(String error) {
