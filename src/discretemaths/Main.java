@@ -251,16 +251,34 @@ public class Main {
         }
 
         if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-            removeItem(lines.get(lineNum - 1));
-            lines.remove(lineNum - 1);
-            for (int i = lineNum - 1; i < lines.size(); i++) {
-                Line l = lines.get(i);
-                l.setLineNum(l.getLineNum() - 1);
-                l.decrementArgs(lineNum - 1);
+            if (lineNum > 1 && lineNum <= lines.size()) {
+                removeItem(lines.get(lineNum - 1));
+
+                lines.remove(lineNum - 1);
+
+                boolean selectedLine = false;
+                if (lineNum <= lines.size()) {
+                    for (int i = lineNum - 1; i < lines.size(); i++) {
+                        Line l = lines.get(i);
+                        l.setLineNum(l.getLineNum() - 1);
+                        l.decrementArgs(lineNum - 1);
+
+                        if (!selectedLine) {
+                            l.select();
+                            selectedLine = true;
+                        }
+                    }
+                }
+
+                if (!selectedLine) {
+                    lines.get(lines.size() - 1).select();
+                    selectedLine = true;
+                }
+
+                nextLineNum = lines.size() + 1;
+
+                checkLines();
             }
-
-            checkLines();
-
         }
 
         // 0 1 2 3 4 5
@@ -307,6 +325,8 @@ public class Main {
         linePanel.setPreferredSize(new Dimension(linePanel.getWidth(), (lines.size() - 1) * LINE_HEIGHT));
 
         linePanel.remove(c);
+        linePanel.revalidate();
+        linePanel.repaint();
         frame.pack();
     }
 

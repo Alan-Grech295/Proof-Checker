@@ -141,7 +141,7 @@ public class Line extends JPanel {
         line.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                Main.getInstance().keyPressed(lineNum, e);
+                Main.getInstance().keyPressed(getLineNum(), e);
             }
         });
 
